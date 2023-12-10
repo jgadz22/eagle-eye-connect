@@ -1,11 +1,6 @@
 import UserCard from "@/components/cards/UserCard";
-import PostsTab from "@/components/shared/PostsTab";
-import ProfileHeader from "@/components/shared/ProfileHeader";
-import { profileTabs } from "@/constants";
 import { fetchUser, fetchUsers } from "@/lib/actions/user.actions";
 import { currentUser } from "@clerk/nextjs";
-import { table } from "console";
-import Image from "next/image";
 import { redirect } from "next/navigation";
 
 const Page = async () => {

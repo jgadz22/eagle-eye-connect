@@ -133,3 +133,30 @@ export async function fetchUsers({
     throw new Error(`Failed to create/update user: ${error.message}`);
   }
 }
+
+export async function getActivity(userId: string) {
+  try {
+    connectToDB();
+
+    // find all post created by the user
+    const userPosts = await Thread.find({ author: userId });
+
+    // Collect all the replies (child thread ids) from the children field in mongodb
+    const childPostId = userPosts.reduce((acc, userPosts) => {
+      return acc.concat(userPosts.children);
+    }, []);
+
+    const replies = await Thread.find({
+      _id: { $in: childPostId },
+      author: { $ne: userId },
+    }).populate({
+      path: "author",
+      model: User,
+      select: "name image _id",
+    });
+
+    return replies;
+  } catch (error: any) {
+    throw new Error(`Failed to create/update user: ${error.message}`);
+  }
+}
