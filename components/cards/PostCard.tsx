@@ -1,6 +1,8 @@
-import { formatDateString } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
+
+import { formatDateString } from "@/lib/utils";
+import DeletePost from "../forms/DeletePost";
 
 interface Props {
   id: string;
@@ -8,9 +10,9 @@ interface Props {
   parentId: string | null;
   content: string;
   author: {
-    id: string;
     name: string;
     image: string;
+    id: string;
   };
   community: {
     id: string;
@@ -26,7 +28,7 @@ interface Props {
   isComment?: boolean;
 }
 
-const PostCard = ({
+function PostCard({
   id,
   currentUserId,
   parentId,
@@ -36,7 +38,7 @@ const PostCard = ({
   createdAt,
   comments,
   isComment,
-}: Props) => {
+}: Props) {
   return (
     <article
       className={`flex w-full flex-col rounded-xl ${
@@ -49,18 +51,18 @@ const PostCard = ({
             <Link href={`/profile/${author.id}`} className="relative h-11 w-11">
               <Image
                 src={author.image}
-                alt="Profile image"
+                alt="user_community_image"
                 fill
                 className="cursor-pointer rounded-full"
               />
             </Link>
 
-            <div className="post-card_bar" />
+            <div className="thread-card_bar" />
           </div>
 
           <div className="flex w-full flex-col">
             <Link href={`/profile/${author.id}`} className="w-fit">
-              <h4 className="cursor-pointer tet-base-semibold text-light-1">
+              <h4 className="cursor-pointer text-base-semibold text-light-1">
                 {author.name}
               </h4>
             </Link>
@@ -79,7 +81,7 @@ const PostCard = ({
                 <Link href={`/post/${id}`}>
                   <Image
                     src="/assets/reply.svg"
-                    alt="reply"
+                    alt="heart"
                     width={24}
                     height={24}
                     className="cursor-pointer object-contain"
@@ -87,14 +89,14 @@ const PostCard = ({
                 </Link>
                 <Image
                   src="/assets/repost.svg"
-                  alt="repost"
+                  alt="heart"
                   width={24}
                   height={24}
                   className="cursor-pointer object-contain"
                 />
                 <Image
                   src="/assets/share.svg"
-                  alt="share"
+                  alt="heart"
                   width={24}
                   height={24}
                   className="cursor-pointer object-contain"
@@ -102,16 +104,45 @@ const PostCard = ({
               </div>
 
               {isComment && comments.length > 0 && (
-                <Link href={`/post/${id}`}>
+                <Link href={`/thread/${id}`}>
                   <p className="mt-1 text-subtle-medium text-gray-1">
-                    {comments.length} replies
+                    {comments.length} repl{comments.length > 1 ? "ies" : "y"}
                   </p>
                 </Link>
               )}
             </div>
           </div>
         </div>
+
+        <DeletePost
+          threadId={JSON.stringify(id)}
+          currentUserId={currentUserId}
+          authorId={author.id}
+          parentId={parentId}
+          isComment={isComment}
+        />
       </div>
+
+      {!isComment && comments.length > 0 && (
+        <div className="ml-1 mt-3 flex items-center gap-2">
+          {comments.slice(0, 2).map((comment, index) => (
+            <Image
+              key={index}
+              src={comment.author.image}
+              alt={`user_${index}`}
+              width={24}
+              height={24}
+              className={`${index !== 0 && "-ml-5"} rounded-full object-cover`}
+            />
+          ))}
+
+          <Link href={`/thread/${id}`}>
+            <p className="mt-1 text-subtle-medium text-gray-1">
+              {comments.length} repl{comments.length > 1 ? "ies" : "y"}
+            </p>
+          </Link>
+        </div>
+      )}
 
       {!isComment && community && (
         <Link
@@ -119,7 +150,8 @@ const PostCard = ({
           className="mt-5 flex items-center"
         >
           <p className="text-subtle-medium text-gray-1">
-            {formatDateString(createdAt)} - {community.name} Community
+            {formatDateString(createdAt)}
+            {community && ` - ${community.name} Community`}
           </p>
 
           <Image
@@ -133,6 +165,6 @@ const PostCard = ({
       )}
     </article>
   );
-};
+}
 
 export default PostCard;

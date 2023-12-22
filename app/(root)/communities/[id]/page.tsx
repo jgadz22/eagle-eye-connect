@@ -1,16 +1,17 @@
+import Image from "next/image";
+import { currentUser } from "@clerk/nextjs";
+
+import { communityTabs } from "@/constants";
+
 import UserCard from "@/components/cards/UserCard";
-import PostsTab from "@/components/shared/PostsTab";
 import ProfileHeader from "@/components/shared/ProfileHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { communityTabs } from "@/constants";
+
 import { fetchCommunityDetails } from "@/lib/actions/community.actions";
-import { currentUser } from "@clerk/nextjs";
-import { table } from "console";
-import Image from "next/image";
+import PostsTab from "@/components/shared/PostsTab";
 
-const Page = async ({ params }: { params: { id: string } }) => {
+async function Page({ params }: { params: { id: string } }) {
   const user = await currentUser();
-
   if (!user) return null;
 
   const communityDetails = await fetchCommunityDetails(params.id);
@@ -18,7 +19,7 @@ const Page = async ({ params }: { params: { id: string } }) => {
   return (
     <section>
       <ProfileHeader
-        accountId={communityDetails.id}
+        accountId={communityDetails.createdBy.id}
         authUserId={user.id}
         name={communityDetails.name}
         username={communityDetails.username}
@@ -37,41 +38,39 @@ const Page = async ({ params }: { params: { id: string } }) => {
                   alt={tab.label}
                   width={24}
                   height={24}
-                  className="object-contian"
+                  className="object-contain"
                 />
-
                 <p className="max-sm:hidden">{tab.label}</p>
-
-                {tab.label === "Threads" && (
-                  <p className="ml-1 rounded-sm bg-light-4 px-2 py-1 !text-tiny-medium text-light-2">
-                    {communityDetails?.threads?.length}
-                  </p>
-                )}
               </TabsTrigger>
             ))}
           </TabsList>
-          <TabsContent value="posts" className="w-full text-light-1">
+
+          <TabsContent value="threads" className="w-full text-light-1">
+            {/* @ts-ignore */}
             <PostsTab
               currentUserId={user.id}
               accountId={communityDetails._id}
               accountType="Community"
             />
           </TabsContent>
-          <TabsContent value="members" className="w-full text-light-1">
+
+          <TabsContent value="members" className="mt-9 w-full text-light-1">
             <section className="mt-9 flex flex-col gap-10">
-              {communityDetails?.members.map((member: any) => (
+              {communityDetails.members.map((member: any) => (
                 <UserCard
                   key={member.id}
                   id={member.id}
                   name={member.name}
                   username={member.username}
-                  imgUrl={member.imgUrl}
+                  imgUrl={member.image}
                   personType="User"
                 />
               ))}
             </section>
           </TabsContent>
-          <TabsContent value="request" className="w-full text-light-1">
+
+          <TabsContent value="requests" className="w-full text-light-1">
+            {/* @ts-ignore */}
             <PostsTab
               currentUserId={user.id}
               accountId={communityDetails._id}
@@ -82,6 +81,6 @@ const Page = async ({ params }: { params: { id: string } }) => {
       </div>
     </section>
   );
-};
+}
 
 export default Page;
